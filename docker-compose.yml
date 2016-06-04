@@ -1,0 +1,28 @@
+zookeeper:
+    image: zookeeper:3.4.8-alpine
+    restart: always
+
+nimbus:
+    image: storm:1.0.1-alpine
+    command: storm nimbus -c storm.zookeeper.servers="[\"zookeeper\"]" -c nimbus.host="nimbus"
+    links:
+        - zookeeper
+    restart: always
+    ports:
+        - "6627:6627"
+
+supervisor:
+    image: storm:1.0.1-alpine
+    command: storm supervisor -c storm.zookeeper.servers="[\"zookeeper\"]" -c nimbus.host="nimbus"
+    links:
+        - nimbus
+    restart: always
+
+ui:
+    image: storm:1.0.1-alpine
+    command: storm ui -c storm.zookeeper.servers="[\"zookeeper\"]" -c nimbus.host="nimbus"
+    links:
+        - supervisor
+    restart: always
+    ports:
+        - "8080:8080"
